@@ -3,10 +3,14 @@ from rest_framework.routers import DefaultRouter
 
 from .views import UserViewSet
 
-users_router = DefaultRouter()
-users_router.register('users', UserViewSet, basename='users')
+users_router_v1 = DefaultRouter()
+users_router_v1.register('users', UserViewSet)
+
+api_patterns_v1 = [
+    path('auth/', include('djoser.urls.authtoken')),
+    path('', include(users_router_v1.urls)),
+]
 
 urlpatterns = [
-    path('', include(users_router.urls)),
-    path('auth/', include('djoser.urls.authtoken'))
+    path('', include(api_patterns_v1))
 ]

@@ -21,7 +21,6 @@ class CreateListRetrieveViewSet(
 
 class UserViewSet(CreateListRetrieveViewSet):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
     pagination_class = UsersPagination
 
     def get_permissions(self):
