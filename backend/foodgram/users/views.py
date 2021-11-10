@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from .serializers import (UserRegistrationSerializer, UserSerializer,
                           PasswordSerializer)
-from .pagination import UsersPagination
+from recipes.pagination import CustomPagination
 
 User = get_user_model()
 
@@ -21,7 +21,7 @@ class CreateListRetrieveViewSet(
 
 class UserViewSet(CreateListRetrieveViewSet):
     queryset = User.objects.all()
-    pagination_class = UsersPagination
+    pagination_class = CustomPagination
 
     def get_permissions(self):
         if self.action == 'create':

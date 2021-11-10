@@ -54,7 +54,11 @@ class Tag(models.Model):
 
 class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
+    recipe = models.ForeignKey(
+        'Recipe',
+        related_name='recipeingredients',
+        on_delete=models.CASCADE
+    )
     amount = models.FloatField()
 
     class Meta:
@@ -62,6 +66,9 @@ class RecipeIngredient(models.Model):
             fields=['ingredient', 'recipe'],
             name='unique_ingredient_in_recipe'
         ), ]
+
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
 
 
 class Recipe(models.Model):
@@ -79,7 +86,7 @@ class Recipe(models.Model):
         related_name='ingredients',
         verbose_name='Ингредиенты'
     )
-    image = models.URLField(verbose_name='Изображение')
+    image = models.CharField(max_length=200, verbose_name='Изображение')
     text = models.TextField(verbose_name='Описание рецепта')
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления'
@@ -88,3 +95,8 @@ class Recipe(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return f'{self.name} (by {self.author})'

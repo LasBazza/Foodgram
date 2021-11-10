@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class ShoppingList(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name='shopping_list'
@@ -16,10 +16,10 @@ class ShoppingList(models.Model):
 
 
 class FavoriteList(models.Model):
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        related_name='FavoriteList'
+        related_name='favorite_list'
     )
     recipes = models.ManyToManyField(Recipe)
 
