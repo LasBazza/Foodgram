@@ -3,27 +3,24 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from users.permissions import IsAuthorPermission
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer
-from .models import Tag, Recipe, Ingredient
-from .pagination import CustomPagination
 from lists.models import FavoriteList, ShoppingList
 from lists.serializers import RecipeForListsSerializer
-
-
-
+from users.permissions import IsAuthorPermission
+from .models import Tag, Recipe, Ingredient
+from .pagination import CustomPagination
+from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = permissions.AllowAny
+    permission_classes = [permissions.AllowAny]
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = permissions.AllowAny
+    permission_classes = [permissions.AllowAny]
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from .models import Recipe, Ingredient, RecipeIngredient, Tag
-from users.serializers import UserSerializer
 from lists.models import FavoriteList, ShoppingList
+from users.serializers import UserSerializer
+from .models import Recipe, Ingredient, RecipeIngredient, Tag
 
 
 class IngredientSerializer(serializers.ModelSerializer):
