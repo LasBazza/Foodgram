@@ -12,7 +12,10 @@ class ShoppingList(models.Model):
         on_delete=models.CASCADE,
         related_name='shopping_list'
     )
-    recipes = models.ManyToManyField(Recipe)
+    recipes = models.ManyToManyField(
+        Recipe,
+        related_name='in_shopping_list'
+    )
 
 
 class FavoriteList(models.Model):
@@ -21,7 +24,10 @@ class FavoriteList(models.Model):
         on_delete=models.CASCADE,
         related_name='favorite_list'
     )
-    recipes = models.ManyToManyField(Recipe)
+    recipes = models.ManyToManyField(
+        Recipe,
+        related_name='in_favorite_list'
+    )
 
 
 class Follow(models.Model):

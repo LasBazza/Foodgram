@@ -106,5 +106,11 @@ class UserViewSet(CreateListRetrieveViewSet):
     @action(detail=False, permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
         authors = User.objects.filter(followers__follower=request.user)
+
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(authors, request)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         serializer = self.get_serializer(authors, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)

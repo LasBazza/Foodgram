@@ -2,25 +2,13 @@ from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 
-from lists.models import Follow
+from lists.list_checkers import ListChecker
 from lists.serializers import RecipeForListsSerializer
+from recipes.models import Recipe
 
 User = get_user_model()
 
-
-class IsSubscribeChecker:
-
-    def is_subcribed(self, instance, obj):
-        request = instance.context.get('request')
-        if request.user is None or request.user.is_anonymous:
-            return False
-        return Follow.objects.filter(
-            follower=request.user,
-            author=obj
-        ).exists()
-
-
-is_subscribe_checker = IsSubscribeChecker()
+checker = ListChecker()
 
 
 class UserRegistrationSerializer(UserCreateSerializer):
@@ -42,12 +30,12 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
     def get_is_subscribed(self, obj):
-        return is_subscribe_checker.is_subcribed(self, obj)
+        return checker.is_subcribed(self, obj)
 
 
 class UserSubscriptionSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
-    recipes = RecipeForListsSerializer(read_only=True, many=True)
+    recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -57,7 +45,17 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
                   'recipes', 'recipes_count')
 
     def get_is_subscribed(self, obj):
-        return is_subscribe_checker.is_subcribed(self, obj)
+        return checker.is_subcribed(self, obj)
+
+    def get_recipes(self, obj):
+        recipes_limit = self.context.get('request').query_params.get(
+            'recipes_limit')
+        queryset = Recipe.objects.filter(author=obj)
+        if recipes_limit:
+            recipes_limit = int(recipes_limit)
+            queryset = queryset[:recipes_limit]
+        serializer = RecipeForListsSerializer(queryset, many=True)
+        return serializer.data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()

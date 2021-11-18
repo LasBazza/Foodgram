@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.db import models
 
+
 User = get_user_model()
 
 
@@ -9,7 +10,6 @@ class Ingredient(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name='Название ингредиента',
-        unique=True
     )
     measurement_unit = models.CharField(
         max_length=200,
@@ -20,6 +20,11 @@ class Ingredient(models.Model):
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
+        constraints = [models.UniqueConstraint(
+            fields=['name', 'measurement_unit'],
+            name='unique_ingredient'
+        ), ]
+
     def __str__(self):
         return self.name
 
@@ -29,7 +34,6 @@ class Tag(models.Model):
         max_length=200,
         verbose_name='Название тега',
         unique=True,
-        db_index=True
     )
     color = models.CharField(
         max_length=7,
@@ -86,7 +90,10 @@ class Recipe(models.Model):
         related_name='ingredients',
         verbose_name='Ингредиенты'
     )
-    image = models.CharField(max_length=200, verbose_name='Изображение')
+    image = models.ImageField(
+        upload_to='recipes/',
+        verbose_name='Изображение'
+    )
     text = models.TextField(verbose_name='Описание рецепта')
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления'
@@ -97,6 +104,11 @@ class Recipe(models.Model):
         ordering = ['-pub_date']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
+
+    def count_in_favorite(self):
+        return self.in_favorite_list.count()
+
+    count_in_favorite.short_description = 'Число добавлений в избранное'
 
     def __str__(self):
         return f'{self.name} (by {self.author})'

@@ -1,9 +1,12 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from lists.models import FavoriteList, ShoppingList
+from lists.list_checkers import ListChecker
 from users.serializers import UserSerializer
 from .models import Recipe, Ingredient, RecipeIngredient, Tag
+from .fileds import Base64ImageField
+
+checker = ListChecker()
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -45,6 +48,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -101,19 +105,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return instance
 
     def get_is_favorited(self, obj):
-        request = self.context.get('request')
-        if request.user is None or request.user.is_anonymous:
-            return False
-        return FavoriteList.objects.filter(
-            user=request.user,
-            recipes=obj
-        ).exists()
+        return checker.is_favorited(self, obj)
 
     def get_is_in_shopping_cart(self, obj):
-        request = self.context.get('request')
-        if request.user is None or request.user.is_anonymous:
-            return False
-        return ShoppingList.objects.filter(
-            user=request.user,
-            recipes=obj
-        ).exists()
+        return checker.is_in_shopping_cart(self, obj)
