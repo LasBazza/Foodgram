@@ -1,36 +1,23 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, mixins, permissions, status
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from recipes.pagination import CustomPagination
 from lists.models import Follow
+from .permissions import SignUpOrIsAuthentificated
+from .mixins import CreateListRetrieveViewSet
 from .serializers import (UserRegistrationSerializer, UserSerializer,
                           PasswordSerializer, UserSubscriptionSerializer)
 
 User = get_user_model()
 
 
-class CreateListRetrieveViewSet(
-    viewsets.GenericViewSet,
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
-):
-    pass
-
-
 class UserViewSet(CreateListRetrieveViewSet):
     queryset = User.objects.all()
     pagination_class = CustomPagination
-
-    def get_permissions(self):
-        if self.action == 'create':
-            permission_classes = [permissions.AllowAny]
-        else:
-            permission_classes = [permissions.IsAuthenticated]
-        return [permission() for permission in permission_classes]
+    permission_classes = [SignUpOrIsAuthentificated, ]
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -56,11 +43,10 @@ class UserViewSet(CreateListRetrieveViewSet):
     def set_password(self, request):
         user = request.user
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            user.set_password(serializer.validated_data['new_password'])
-            user.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         methods=['get', 'delete'],
@@ -80,7 +66,7 @@ class UserViewSet(CreateListRetrieveViewSet):
                 author=author,
                 follower=user
             )
-            if created is False:
+            if not created:
                 return Response(
                     data=['You are already subscribed to this user'],
                     status=status.HTTP_400_BAD_REQUEST

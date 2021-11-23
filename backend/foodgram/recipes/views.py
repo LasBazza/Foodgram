@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import Sum
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -6,7 +7,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from lists.serializers import RecipeForListsSerializer
 from lists.models import FavoriteList, ShoppingList
-from users.permissions import IsAuthorPermission
+from users.permissions import IsAuthorOrReadOnlyPermission
 from .to_pdf_maker.to_pdf_maker import shopping_cart_to_pdf
 from .models import Tag, Recipe, Ingredient, RecipeIngredient
 from .pagination import CustomPagination
@@ -34,15 +35,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
-
-    def get_permissions(self):
-        if self.action == 'create':
-            permission_classes = [permissions.IsAuthenticated]
-        elif self.action in ['list', 'retrieve']:
-            permission_classes = [permissions.AllowAny]
-        else:
-            permission_classes = [IsAuthorPermission]
-        return [permission() for permission in permission_classes]
+    permission_classes = [IsAuthorOrReadOnlyPermission, ]
 
     def get_serializer_class(self):
         if self.action in ['favorite', 'shopping_cart']:
@@ -73,7 +66,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients_in_recipes = RecipeIngredient.objects.filter(
             recipe__in_shopping_list__user=request.user
         ).select_related('ingredient')
-        return shopping_cart_to_pdf(ingredients_in_recipes)
+        result_list = ingredients_in_recipes.values(
+            'ingredient__name',
+            'ingredient__measurement_unit'
+        ).annotate(amount=Sum('amount'))
+
+        return shopping_cart_to_pdf(result_list)
 
     def list_method(self, request, pk, list_type):
         model = {
@@ -88,7 +86,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'GET':
             serializer = self.get_serializer(recipe)
-            list_object, created = (
+            list_object, _ = (
                 model.get(list_type).objects.get_or_create(user=user)
             )
             if getattr(list_object, 'recipes').filter(id=recipe.id).exists():

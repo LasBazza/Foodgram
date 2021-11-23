@@ -43,7 +43,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
-        many=True
+        many=True,
     )
     author = UserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
@@ -61,35 +61,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         self.fields['tags'] = TagSerializer(many=True)
         return super().to_representation(obj)
 
-    def create(self, validated_data):
-        ingredients = validated_data.pop('recipeingredients')
-        tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
-
-        for ingredient in ingredients:
-            current_ingredient = get_object_or_404(
-                Ingredient,
-                id=ingredient['ingredient']['id']
-            )
-            RecipeIngredient.objects.create(
-                ingredient=current_ingredient,
-                recipe=recipe,
-                amount=ingredient['amount']
-            )
-        recipe.tags.set(tags)
-        return recipe
-
-    def update(self, instance, validated_data):
-        ingredients = validated_data.pop('recipeingredients')
-        tags = validated_data.pop('tags')
-        instance.name = validated_data.get('name', instance.name)
-        instance.image = validated_data.get('image', instance.image)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time',
-            instance.cooking_time
-        )
-        instance.ingredients.clear()
+    def set_ingredients(self, ingredients, instance):
         for ingredient in ingredients:
             current_ingredient = get_object_or_404(
                 Ingredient,
@@ -100,12 +72,58 @@ class RecipeSerializer(serializers.ModelSerializer):
                 recipe=instance,
                 amount=ingredient['amount']
             )
+
+    def create(self, validated_data):
+        ingredients = validated_data.pop('recipeingredients')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+
+        self.set_ingredients(ingredients, recipe)
+        recipe.tags.set(tags)
+        return recipe
+
+    def update(self, instance, validated_data):
+        ingredients = validated_data.pop('recipeingredients')
+        tags = validated_data.pop('tags')
+        instance.ingredients.clear()
+        self.set_ingredients(ingredients, instance)
         instance.tags.set(tags)
-        instance.save()
-        return instance
+        return super().update(instance, validated_data)
 
     def get_is_favorited(self, obj):
         return checker.is_favorited(self, obj)
 
     def get_is_in_shopping_cart(self, obj):
         return checker.is_in_shopping_cart(self, obj)
+
+    def validate_cooking_time(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(
+                'Cooking time must be greater than zero.'
+            )
+        return value
+
+    def validate_ingredients(self, value):
+        ingredients = self.initial_data.get('ingredients')
+
+        encountered_ingredients = []
+        for ingredient in ingredients:
+            if ingredient['id'] not in encountered_ingredients:
+                encountered_ingredients.append(ingredient['id'])
+            else:
+                message = 'Ingredients should not be repeated'
+                raise serializers.ValidationError(message)
+
+        return value
+
+    def validate_tags(self, value):
+        tags = self.initial_data.get('tags')
+
+        encountered_tags = []
+        for tag in tags:
+            if tag not in encountered_tags:
+                encountered_tags.append(tag)
+            else:
+                message = 'Tags should not be repeated'
+                raise serializers.ValidationError(message)
+        return value

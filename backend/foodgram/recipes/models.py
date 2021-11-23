@@ -83,11 +83,11 @@ class Recipe(models.Model):
         verbose_name='Автор',
         related_name='recipes',
     )
-    tags = models.ManyToManyField(Tag, related_name='tags')
+    tags = models.ManyToManyField(Tag, related_name='recipes')
     ingredients = models.ManyToManyField(
         Ingredient,
         through=RecipeIngredient,
-        related_name='ingredients',
+        related_name='recipes',
         verbose_name='Ингредиенты'
     )
     image = models.ImageField(

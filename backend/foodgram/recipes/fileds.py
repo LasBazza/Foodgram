@@ -21,4 +21,4 @@ class Base64ImageField(serializers.ImageField):
         file_name = str(uuid4())[:12] + extension
         data = ContentFile(imagestr, name=file_name)
 
-        return super(Base64ImageField, self).to_internal_value(data)
+        return super().to_internal_value(data)

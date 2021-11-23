@@ -64,4 +64,3 @@ class UserSubscriptionSerializer(serializers.ModelSerializer):
 class PasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField()
     current_password = serializers.CharField()
-
