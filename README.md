@@ -33,7 +33,7 @@ docker-compose exec backend python manage.py createsuperuser
 **5. Заполнить файл _.env_ и поместить его в папку, где лежит файл _manage.py_**
 
 ```
-SECRET_KEY=your_django_secret_key
+SECRET_KEY=django_secret_key
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=postgres
 POSTGRES_USER=postgres
@@ -42,3 +42,12 @@ DB_HOST=db
 DB_PORT=5432
 ```
 
+Проект запущен на сервере по адресу http://51.250.0.202/
+
+Логин и пароль администратора:
+
+```
+email: admin@email.com
+username: admin
+password: iwillbecomedeveloper
+```
