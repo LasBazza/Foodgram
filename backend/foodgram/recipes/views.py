@@ -85,7 +85,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'GET':
-            serializer = self.get_serializer(recipe)
+
             list_object, _ = (
                 model.get(list_type).objects.get_or_create(user=user)
             )
@@ -95,6 +95,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             getattr(list_object, 'recipes').add(recipe)
+            serializer = self.get_serializer(recipe)
             return Response(
                 data=serializer.data,
                 status=status.HTTP_201_CREATED

@@ -133,3 +133,4 @@ dmypy.json
 
 tokens.txt
 media/
+static/
