@@ -1,36 +1,29 @@
 # Foodgram
 ## Описание
 
-Продуктовый помощник
+Продуктовый помощник, блог кулинарных рецептов. Зарегистрированные пользователи могут публиковать свои рецепты, подписываться на других пользователей, добавлять рецепты в _Избранное_ и в список покупок. На основе рецептов, добавленных в список покупок, можно сформировать список необходимых продуктов и выгрузить его в PDF.
+
+
+* Python 3.8
+* Django 2.2.8
+* Django Rest Framework
+* [Djoser](https://djoser.readthedocs.io/en/latest/)
+* [Django-filter](https://django-filter.readthedocs.io/en/stable/index.html)
+* [ReportLab](https://www.reportlab.com/dev/docs/)
+* Gunicorn
+* PostgreSQL
+* Docker
+* Nginx
 
 ## Запуск проекта
 
 **1. Склонировать репозиторий**
 
-**2. Запустить docker-compose из папки**
-
-Выполнить в папке _foodgram-project-react/infra_ команду
-
 ```
-docker-compose up
-```
-Миграции в проекте применяются автоматически
-
-**3. Импортировать исходные данные с ингредиентами в базу данных**
-
-После того как все контейнеры запустяться в той же папке выполнить команду
-```
-docker-compose exec backend python manage.py loaddata ingredients.json
-```
-**4. Создать суперпользователя**
-
-Там же выполнить
-
-```
-docker-compose exec backend python manage.py createsuperuser
+git clone https://github.com/LasBazza/foodgram-project-react.git
 ```
 
-**5. Заполнить файл _.env_ и поместить его в папку, где лежит файл _manage.py_**
+**2. Заполнить файл _.env_ и поместить его в папку _foodgram-project-react/backend/foodgram/_**
 
 ```
 SECRET_KEY=django_secret_key
@@ -42,12 +35,29 @@ DB_HOST=db
 DB_PORT=5432
 ```
 
-Проект запущен на сервере по адресу http://51.250.0.202/
+**3. Запустить docker-compose**
 
-Логин и пароль администратора:
+Выполнить в папке _foodgram-project-react/infra/_ команду
 
 ```
-email: admin@email.com
-username: admin
-password: iwillbecomedeveloper
+docker-compose up
 ```
+
+Миграции в проекте применяются автоматически
+
+**4. Импортировать исходные данные с ингредиентами в базу данных**
+
+После запуска всех контейнеров в той же папке выполнить команду
+```
+docker-compose exec backend python manage.py loaddata ingredients.json
+```
+
+**4. Создать суперпользователя**
+
+Там же выполнить
+
+```
+docker-compose exec backend python manage.py createsuperuser
+```
+
+Проект доступен на http://127.0.0.1/. Ингредиенты и тэги можно добавить через админ-панель django http://127.0.0.1/admin/.
