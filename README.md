@@ -20,10 +20,10 @@
 **1. Склонировать репозиторий**
 
 ```
-git clone https://github.com/LasBazza/foodgram-project-react.git
+git clone https://github.com/LasBazza/Foodgram
 ```
 
-**2. Заполнить файл _.env_ и поместить его в папку _foodgram-project-react/backend/foodgram/_**
+**2. Заполнить файл _.env_ и поместить его в папку _Foodgram/backend/foodgram/_**
 
 ```
 SECRET_KEY=django_secret_key
@@ -37,7 +37,7 @@ DB_PORT=5432
 
 **3. Запустить docker-compose**
 
-Выполнить в папке _foodgram-project-react/infra/_ команду
+Выполнить в папке _Foodgram/infra/_ команду
 
 ```
 docker-compose up
