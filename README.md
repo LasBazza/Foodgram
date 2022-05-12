@@ -19,10 +19,6 @@
 
 **1. Склонировать репозиторий**
 
-```
-git clone https://github.com/LasBazza/Foodgram
-```
-
 **2. Заполнить файл _.env_ и поместить его в папку _Foodgram/backend/foodgram/_**
 
 ```
